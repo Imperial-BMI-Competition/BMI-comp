@@ -7,11 +7,12 @@ load('monkeydata_training.mat')
 
 test_spikes = trial(1,1).spikes;
 
-ma_spikes = unit_ma(test_spikes,31100);
-
-area(ma_spikes(1,:))
-
-
+ma_spikes = unit_ma(test_spikes,10);
+figure(1)
+for i = 1:98
+    area(ma_spikes(i,:))
+    pause
+end
 %% Convolution
 
 %% Fourier
