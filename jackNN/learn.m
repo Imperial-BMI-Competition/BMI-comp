@@ -12,7 +12,7 @@ for T = 1:90
     for D = 1:dirs
     inputs = transpose(g_filter(trial(T,D).spikes,wdw,5));
     targets = tanh(transpose(trial(T,D).handPos(1:2,:))./100);
-    model = train(model,inputs,targets);
+    model = train_model(model,inputs,targets);
     end
 end
 end
