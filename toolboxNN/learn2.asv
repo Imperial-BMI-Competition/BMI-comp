@@ -15,15 +15,14 @@ load('monkeydata_training.mat');
 %         avgSpikecounts{unitNum,dirNum} = mean(collate,1);
 %         clearvars collate
 %     end
-% % end
+% end
 % for n=1:size(trial,1)
 %     for a = 1:size(trial,2)
 %     positions = trial(n,a).handPos;
-%     [theta, rho] = cart2polar(positions(1,:),positions(2,:));
+%     [theta, rho] = cart2pol(positions(1,:),positions(2,:));
 %     trial(n,a).handPosPolar = [theta; rho];
 %     end
 % end
-trial = cart2polar( trial,true )
 output = fr_processing(trial,20);
 max_D = 8;
 hidden = 4;
@@ -43,10 +42,8 @@ for i = 1:50
             R(U,:) = row(1:500);
         end
         X = con2seq(R);
-        S1 = con2seq(trial(1,D).handPos(1:2,1:500));
-        S2 = con2seq(output.Av_po{D}(1:2,1:500));
-        T = S2;
-        [Xs,Xi,Ai,Ts] = preparets(model,X,T);
+        T = con2seq(output.Av_po{D});
+        [Xs,Xi,Ai,Ts] = preparets(model,X,T(:,1:500));
         fprintf('Training model...\n')
         model = train(model,Xs,Ts,Xi,Ai);
         Y = model(Xs,Xi,Ai);

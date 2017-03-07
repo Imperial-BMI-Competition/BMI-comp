@@ -3,49 +3,32 @@ clearvars;
 close all;
 fprintf('Loading data...\n')
 load('monkeydata_training.mat');
-% for unitNum = 1:98
-%     for dirNum = 1:8
-%         for trialNum = 1:100
-%             spikeTrain = trial(trialNum,dirNum).spikes(unitNum,:);
-%             for timeIdx = length(spikeTrain)
-%                 collate(trialNum,timeIdx) = spikeTrain(timeIdx);
-%             end
-%         end
-%         mean(collate,1)
-%         avgSpikecounts{unitNum,dirNum} = mean(collate,1);
-%         clearvars collate
-%     end
-% % end
-% for n=1:size(trial,1)
-%     for a = 1:size(trial,2)
-%     positions = trial(n,a).handPos;
-%     [theta, rho] = cart2polar(positions(1,:),positions(2,:));
-%     trial(n,a).handPosPolar = [theta; rho];
-%     end
-% end
-trial = cart2polar( trial,true )
-output = fr_processing(trial,20);
+data_train = trial(1:50,:);
+data_test = trial(50:end,:);
 max_D = 8;
-hidden = 4;
+hidden = 16;
 delays = 2;
+wdw = 100;
+sigma = 20;
+neurons = 98;
 fprintf('Initialising model...\n')
 model = layrecnet(1:delays,hidden,'traingdx');
 model.trainParam.epochs = 20;
+model.trainParam.showWindow = 1;
 showFig = 1;
+model.trainParam.lr = 0.01;
 %% Training
-for i = 1:50
-    for D = 1:8
-        fprintf(strcat('Dir:',num2str(D),'\n'))
-        R = zeros(98,500);
-        for U = 1:98
-            cell = output.l_PSTH_non_shifted(U,D);
-            row=cell{:};
-            R(U,:) = row(1:500);
-        end
-        X = con2seq(R);
-        S1 = con2seq(trial(1,D).handPos(1:2,1:500));
-        S2 = con2seq(output.Av_po{D}(1:2,1:500));
-        T = S2;
+j = 1;
+AEX = zeros(1,size(data_train,1));
+AEY = zeros(1,size(data_train,1));
+for i = 1:10
+for N = 1:size(data_train,1)
+    EX = zeros(1,max_D);
+    EY = zeros(1,max_D);
+    for D = 1:max_D
+        fprintf(strcat('Trial:',num2str(N),',Dir:',num2str(D),'\n'))
+        X = con2seq(g_filter(data_train(N,D).spikes(1:neurons,:),wdw,sigma));
+        T = con2seq(data_train(N,D).handPos(1:2,:));
         [Xs,Xi,Ai,Ts] = preparets(model,X,T);
         fprintf('Training model...\n')
         model = train(model,Xs,Ts,Xi,Ai);
@@ -65,17 +48,29 @@ for i = 1:50
             polarplot(theta,rho,'b')
             hold off;
         end
+        EX(D) = mean((DT(1,delays+1:end)-DY(1,:)).^2);
+        EY(D) = mean((DT(2,delays+1:end)-DY(2,:)).^2);
+    end
+    if showFig == 1
+        figure(2)
+        subplot(1,2,1)
+        AEX(N) = mean(EX);
+        plot(AEX(1:N),'rx-')
+        subplot(1,2,2)
+        AEY(N) = mean(EY);
+        plot(AEY(1:N),'rx-')
     end
 end
+model.trainParam.lr = 0.00003;
 %% Testing
 close all
-TEX = zeros(1,100);
-TEY = zeros(1,100);
+TEX = zeros(1,size(data_test,1));
+TEY = zeros(1,size(data_test,2));
 fprintf('Testing model...\n')
-for N = 1:100
+for N = 1:size(data_test,1)
     D = randi(8);
-    X = con2seq(trial(N,D).spikes);
-    T = con2seq(trial(N,D).handPos(1:2,:));
+    X = con2seq(g_filter(data_test(N,D).spikes(1:neurons,:),wdw,sigma));
+    T = con2seq(data_test(N,D).handPos(1:2,:));
     [Xs,Xi,Ai,Ts] = preparets(model,X,T);
     Y = model(Xs,Xi,Ai);
     CY = seq2con(Y);
