@@ -4,6 +4,17 @@ close all;
 fprintf('Loading data...\n')
 load('monkeydata_training.mat');
 data_train = trial(1:90,:);
+collate = zeros
+for unitNum = 1:98
+    for dirNum = 1:8
+        for trialNum = 1:100
+            spikeTrain = trial(trialNum,dirNum).spikes(unitNum,:)
+            for timeIdx = length(spikeTrain)
+                collate(trialNum,timeIdx) = spikeTrain(timeIdx);
+            end
+        end
+     avgSpikecount(unitNum,dirNum) = mean(collate)
+     collat
 data_test = trial(91:end,:);
 max_D = 8;
 hidden = 4;
