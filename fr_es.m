@@ -1,7 +1,7 @@
 function l = fr_es(A, dt)
 
-for j = 1:(length(A)-dt)
- l(j) = sum(A(j:j+dt))./(dt);
+for j = dt:(length(A))
+ l(j) = sum(A((j-dt):j))./(dt);
 end 
 
 end
