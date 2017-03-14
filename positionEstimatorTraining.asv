@@ -31,15 +31,14 @@ net.performParam.normalization = 'percent';
 fprintf('Training net...\n')
 for learnrate = [10^-2 10^-4 10^-6]
     net.trainParam.lr = learnrate;
+    i = 1;
     for N = 1:size(data_train,1)
         for D = 1:size(data_train,2)
-            rawInput = g_filter(data_train(N,D).spikes,wdw,sigma);
-            rawInput(:,end+1:1000) = NaN;
-            Seqs{D,1} = rawInput;
-            rawTarget = diff(data_train(N,D).handPos(1:2,:),1,2);
-            rawTarget(:,end+1) = 0;
-            rawTarget(:,end+1:1000) = NaN;
-            Diff{D,1} = rawTarget;
+            Seqs{D} = con2seq(g_filter(data_train(N,D).spikes,wdw,sigma));
+            Diff = diff(data_train(N,D).handPos(1:2,:),1,2);
+            Diff(:,end+1) = 0;
+            
+            i = i + 1;
         end
         X = con2seq(Seqs);
         T = con2seq(Diff);

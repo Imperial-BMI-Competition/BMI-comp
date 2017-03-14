@@ -6,14 +6,14 @@ load('monkeydata_training.mat');
 data_train = trial(1:50,:);
 data_test = trial(50:end,:);
 max_D = 8;
-hidden = 16;
+hidden = 4;
 delays = 2;
 wdw = 100;
 sigma = 20;
 neurons = 98;
 fprintf('Initialising model...\n')
 model = layrecnet(1:delays,hidden,'trainrp');
-model.trainParam.epochs = 1;
+model.trainParam.epochs = 5;
 model.trainParam.showWindow = 1;
 showFig = 1;
 model.trainParam.lr = 0.0001;
@@ -22,15 +22,17 @@ j = 1;
 AEX = zeros(1,size(data_train,1));
 AEY = zeros(1,size(data_train,1));
 
-for i = 10:20
-    model.trainParam.lr = exp(-i);
+for learnrate = [10^-2 10^-4 10^-6 10^-8 10^-10]
+    model.trainParam.lr = learnrate;
 for N = 1:size(data_train,1)
     EX = zeros(1,max_D);
     EY = zeros(1,max_D);
     for D = 1:max_D
         fprintf(strcat('Trial:',num2str(N),',Dir:',num2str(D),'\n'))
         X = con2seq(g_filter(data_train(N,D).spikes(1:neurons,:),wdw,sigma));
-        T = con2seq(data_train(N,D).handPos(1:2,:));
+        Diffs = diff(data_train(N,D).handPos(1:2,:),1,2)
+        Diffs(:,end+1) = 0;
+        T = con2seq(Diffs);
         [Xs,Xi,Ai,Ts] = preparets(model,X,T);
         fprintf('Training model...\n')
         model = train(model,Xs,Ts,Xi,Ai);
@@ -74,7 +76,7 @@ fprintf('Testing model...\n')
 for N = 1:size(data_test,1)
     D = randi(8);
     X = con2seq(g_filter(data_test(N,D).spikes(1:neurons,:),wdw,sigma));
-    T = con2seq(data_test(N,D).handPos(1:2,:));
+    T = con2seq(diff(data_test(N,D).handPos(1:2,:),1,2));
     [Xs,Xi,Ai,Ts] = preparets(model,X,T);
     Y = model(Xs,Xi,Ai);
     CY = seq2con(Y);
