@@ -1,3 +1,5 @@
+RMSE = [];
+
 % Jonathan Campbell, Alexander Camuto, Enrico Tosoratti, Amna Askari
 
 % (try not to edit this file too much - based off the file
@@ -8,8 +10,11 @@
 %% Continuous Position Estimator Test Script
 % This function first calls the function "positionEstimatorTraining" to get
 % the relevant modelParameters, and then calls the function
-% "positionEstimator" to decode the trajectory. 
-
+% "positionEstimator" to decode the trajectory.
+RMSE = zeros(10,15);
+for del = [1 2 3 4 5 6 7 8 9 10]
+for hsize = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15]
+close all
 load monkeydata_training.mat
 
 % Set random number generator
@@ -17,8 +22,8 @@ rng(2013);
 ix = randperm(length(trial));
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
-trainingData = trial(ix(1:50),:);
-testData = trial(ix(51:end),:);
+trainingData = trial(ix(1:90),:);
+testData = trial(ix(91:end),:);
 
 
 
@@ -32,7 +37,7 @@ grid
 
 % Train Model
 fprintf('Training the continuous position estimator...')
-modelParameters = positionEstimatorTraining(trainingData);
+modelParameters = positionEstimatorTraining(trainingData,hsize,del);
 
 %% Test model
 fprintf('Testing the continuous position estimator...')
@@ -71,6 +76,9 @@ for tr=1:size(testData,1)
     end
 end
 
+
 legend('Decoded Position', 'Actual Position')
 
-RMSE = sqrt(meanSqError/n_predictions) 
+RMSE(del,hsize) = sqrt(meanSqError/n_predictions);
+end
+end
