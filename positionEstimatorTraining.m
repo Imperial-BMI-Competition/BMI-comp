@@ -1,4 +1,4 @@
-function model = positionEstimatorTraining(data_train,hsize,del)
+function model = positionEstimatorTraining(data_train)
 % Template for our training function for the model
 % Inputs: trainingData (trials)
 % Outputs: modelParameters (Parameters of our regression model, can be anything we choose)
@@ -16,14 +16,12 @@ end
 model = struct();
 model.x0 = data_train(1,1).handPos(1,1);
 model.y0 = data_train(1,1).handPos(2,1);
-hidden = hsize;
-delays = del;
-wdw = 100;
-sigma = 20;
-fprintf('Initialising net...\n')
+hidden = 8;
+delays = 1;
+wdw = 400;
+sigma = 100;
 net = layrecnet(1:delays,hidden,'traingdx');
 net.trainParam.showWindow = 1;
-net.performParam.regularization = 0.03;
 net.performParam.normalization = 'percent';
 %% Training
 for N = 1:size(data_train,1)
@@ -39,7 +37,8 @@ for N = 1:size(data_train,1)
     end
 end
 [Xs,Xi,Ai,Ts] = preparets(net,X,T);
-fprintf('Training net...\n')
 model.net = train(net,Xs,Ts,Xi,Ai);
+pause(0.5)
+close all
 end
 

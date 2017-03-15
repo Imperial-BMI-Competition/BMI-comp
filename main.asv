@@ -12,11 +12,14 @@ RMSE = [];
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory.
 
+reg = [0.2 0.1 0.05];
+RMSE = zeros(1,3);
+for i = 1:3
 close all
 load monkeydata_training.mat
 
 % Set random number generator
-rng(4832932);
+rng(1239);
 ix = randperm(length(trial));
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
@@ -35,7 +38,7 @@ grid
 
 % Train Model
 fprintf('Training the continuous position estimator...')
-modelParameters = positionEstimatorTraining(trainingData);
+modelParameters = positionEstimatorTraining(trainingData,reg(i));
 
 %% Test model
 fprintf('Testing the continuous position estimator...')
@@ -77,4 +80,5 @@ end
 
 legend('Decoded Position', 'Actual Position')
 
-RMSE = sqrt(meanSqError/n_predictions)
+RMSE(i) = sqrt(meanSqError/n_predictions)
+end

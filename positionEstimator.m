@@ -9,8 +9,8 @@ output = zeros(size(spikes));
         output(n,:) = g_spikes(wdw/2:end-wdw/2);
     end
 end
-wdw = 100;
-sigma = 20;
+wdw = 400;
+sigma = 100;
 X = con2seq(g_filter(data_test.spikes,wdw,sigma));
 [Xs,Xi,Ai,~] = preparets(model.net,X);
 Dpos = seq2con(model.net(Xs,Xi,Ai));
