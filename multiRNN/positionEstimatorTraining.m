@@ -14,12 +14,11 @@ output = zeros(size(spikes));
     end
 end
 model = struct();
-model.x0 = data_train(1,1).handPos(1,1);
-model.y0 = data_train(1,1).handPos(2,1);
+model.start = data_train(1,1).handPos(1:2,1);
 hidden = 8;
 delays = 1;
 wdw = 400;
-sigma = 100;
+sigma = 50;
 net = layrecnet(1:delays,hidden,'traingdx');
 net.trainParam.showWindow = 1;
 net.performParam.normalization = 'percent';
@@ -38,7 +37,12 @@ for N = 1:size(data_train,1)
 end
 [Xs,Xi,Ai,Ts] = preparets(net,X,T);
 model.net = train(net,Xs,Ts,Xi,Ai);
-pause(0.5)
+Y = model.net(Xs,Xi,Ai);
+perf = perform(model.net,Y,Ts);
+if perf > 0.01
+    [Xs,Xi,Ai,Ts] = preparets(model.net,X,T);
+    model.net = train(model.net,Xs,Ts,Xi,Ai);
+end
 close all
 end
 

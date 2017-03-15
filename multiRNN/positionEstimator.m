@@ -10,12 +10,12 @@ output = zeros(size(spikes));
     end
 end
 wdw = 400;
-sigma = 100;
+sigma = 50;
 X = con2seq(g_filter(data_test.spikes,wdw,sigma));
 [Xs,Xi,Ai,~] = preparets(model.net,X);
 Dpos = seq2con(model.net(Xs,Xi,Ai));
 DposC = sum(Dpos{:},2);
-decodedPosX = DposC(1) + model.x0;
-decodedPosY = DposC(2) + model.y0;
+decodedPosX = DposC(1) + model.start(1);
+decodedPosY = DposC(2) + model.start(2);
 end
 

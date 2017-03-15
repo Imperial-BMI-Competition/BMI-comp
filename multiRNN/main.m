@@ -16,7 +16,7 @@ close all
 load monkeydata_training.mat
 
 % Set random number generator
-rng(4832932);
+rng(14353);
 ix = randperm(length(trial));
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
@@ -42,7 +42,7 @@ fprintf('Testing the continuous position estimator...')
 for tr=1:size(testData,1)
     display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
     pause(0.001)
-    for direc=1 
+    for direc=randperm(8)
         decodedHandPos = [];
 
         times=320:20:size(testData(tr,direc).spikes,2);
@@ -67,10 +67,32 @@ for tr=1:size(testData,1)
             meanSqError = meanSqError + norm(testData(tr,direc).handPos(1:2,t) - decodedPos)^2;
             
         end
+        switch direc
+            case 1
+                C = 'y';
+            case 2
+                C = 'm';
+            case 3
+                C = 'c';
+            case 4
+                C = 'r';
+            case 5
+                C = 'g';
+            case 6
+                C = 'b';
+            case 7
+                C = 'w';
+            case 8
+                C = 'k';
+            otherwise
+                C = 'k';
+        end
         n_predictions = n_predictions+length(times);
         hold on
-        plot(decodedHandPos(1,:),decodedHandPos(2,:), 'r');
-        plot(testData(tr,direc).handPos(1,times),testData(tr,direc).handPos(2,times),'b')
+        Cp = strcat(C,'.');
+        plot(decodedHandPos(1,:),decodedHandPos(2,:), Cp);
+        plot(testData(tr,direc).handPos(1,times),testData(tr,direc).handPos(2,times),C)
+        set(gca,'Color',[0.8 0.8 0.8]);
     end
 end
 
