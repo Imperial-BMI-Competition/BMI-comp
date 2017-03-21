@@ -1,5 +1,3 @@
-RMSE = [];
-
 % Jonathan Campbell, Alexander Camuto, Enrico Tosoratti, Amna Askari
 
 % (try not to edit this file too much - based off the file
@@ -16,7 +14,7 @@ close all
 load monkeydata_training.mat
 
 % Set random number generator
-rng(14353);
+rng(2020);
 ix = randperm(length(trial));
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
